@@ -1,0 +1,32 @@
+﻿<Page
+    x:Class="EZ_B.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:EZ_B"
+
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+
+    mc:Ignorable="d">
+
+    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="0,20,0,0">
+
+        <Button x:Name="connectButton" Content="Connect" Click="Button_Click"/>
+
+        <TextBlock x:Name="connectStatus"/>
+
+        <TextBlock x:Name="cameraStatus"/>
+        
+        <TextBlock x:Name="errorStatus"/>
+        
+        <TextBlock x:Name="tappedStatus"/>
+        
+        <Image x:Name = "imageSource" Width ="200" Height="200" Visibility= "Visible" Stretch="Fill" />
+        <Button x:Name="forward_btn" Content="Forward" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Forward_Btn_Click"/>
+        <Button x:Name="stop_btn" Content="Stop" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Stop_Btn_Click"/>
+
+
+    </StackPanel>
+</Page>
+
