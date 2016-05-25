@@ -27,7 +27,7 @@ using Windows.System.Display;         // Used to keep the screen awake during pr
 using Windows.UI.Core;                // Used for updating UI from within async operations
 using System.Diagnostics;
 using Windows.UI.Xaml.Media.Imaging;
-
+using Windows.UI.ViewManagement;
 
 
 
@@ -57,7 +57,7 @@ namespace EZ_B
             _timer.Interval = TimeSpan.FromMilliseconds(500);
             _timer.Tick += _timer_Tick;
             Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
-
+            ApplicationView.GetForCurrentView().TryResizeView(new Size { Width = 800, Height = 480 });
 
         }
 

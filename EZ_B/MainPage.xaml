@@ -9,8 +9,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 
     mc:Ignorable="d" Width="Auto" Height="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="800" MaxHeight="480"
-    > 
-    
+    >
+
     <StackPanel Orientation="Horizontal" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="800" Height="477">
         <Image x:Name="videoFeed" Height="480" Width="640"/>
         <StackPanel Name="controlbar">
