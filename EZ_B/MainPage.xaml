@@ -8,8 +8,34 @@
 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 
-    mc:Ignorable="d">
+    mc:Ignorable="d" Width="Auto" Height="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="800" MaxHeight="480"
+    > 
+    
+    <StackPanel Orientation="Horizontal" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="800" Height="477">
+        <Image x:Name="videoFeed" Height="480" Width="640"/>
+        <StackPanel Name="controlbar">
+            <StackPanel Name="buttons">
+                <Button x:Name="connectButton" Content="Connect"  Height="40" HorizontalAlignment="Stretch" Click="Connect_Button_Click"/>
+                <Button x:Name="forward_btn" Content="Forward"  Height="40" HorizontalAlignment="Stretch" Click="Forward_Btn_Click"/>
+                <StackPanel Name="rightleft" Orientation="Horizontal">
+                    <Button x:Name="left_btn" Content="Left" Height="60" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="80" Click="Left_Btn_Click"/>
+                    <Button x:Name="right_btn" Content="Right"  Height="60" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="80" Click="Right_Btn_Click"/>
+                </StackPanel>
+                <Button x:Name="reverse_btn" Content="Reverse"  Height="40" HorizontalAlignment="Stretch" Click="Reverse_Btn_Click"/>
+                <Button x:Name="stop_btn" Content="Stop"  Height="40" HorizontalAlignment="Stretch" Click="Stop_Btn_Click"/>
+            </StackPanel>
+            <TextBlock x:Name="connectStatus" Text="Connection Status"/>
 
+            <TextBlock x:Name="cameraStatus" Text="Camera Status"/>
+
+            <TextBlock x:Name="errorStatus" Text="Error Status"/>
+
+            <TextBlock x:Name="tappedStatus" Text="Tapped Status"/>
+
+        </StackPanel>
+    </StackPanel>
+
+    <!--
     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="0,20,0,0">
 
         <Button x:Name="connectButton" Content="Connect" Click="Button_Click"/>
@@ -28,5 +54,6 @@
 
 
     </StackPanel>
+    -->
 </Page>
 

@@ -33,6 +33,7 @@ namespace EZ_B
                 Microsoft.ApplicationInsights.WindowsCollectors.Session);
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
         }
 
         /// <summary>

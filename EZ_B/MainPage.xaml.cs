@@ -56,11 +56,13 @@ namespace EZ_B
 
             _timer.Interval = TimeSpan.FromMilliseconds(500);
             _timer.Tick += _timer_Tick;
+            Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
+
 
         }
 
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void Connect_Button_Click(object sender, RoutedEventArgs e)
         {
             
             if ((Button)sender == connectButton)
@@ -149,7 +151,41 @@ namespace EZ_B
             {
                 _ezb.Movement.GoStop();
             }
-        }      
+        }
+
+        /*
+         * Handler for Reverse Button
+         */
+        private void Reverse_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_ezb != null)
+            {
+                _ezb.Movement.GoReverse();
+            }
+        }
+
+        /*
+         * Handler for Right Button
+         */
+        private void Right_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_ezb != null)
+            {
+                _ezb.Movement.GoRight();
+            }
+        }
+
+        /*
+         * Handler for Left Button
+         */
+        private void Left_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            if (_ezb != null)
+            {
+                _ezb.Movement.GoLeft();
+            }
+        }
+
 
 
         private async void Video_OnImageDataReady(byte[] imageData)
@@ -175,7 +211,7 @@ namespace EZ_B
 
                 sbit.CopyToBuffer(bm.PixelBuffer);
 
-                imageSource.Source = bm;
+                videoFeed.Source = bm;
             });
 
             //await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -208,6 +244,11 @@ namespace EZ_B
             //{
             //    tappedStatus.Text = string.Format("Camera NOT running");
             //}
+        }
+
+        private void connectStatus_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+
         }
     }
 }
