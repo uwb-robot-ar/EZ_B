@@ -121,6 +121,31 @@ namespace EZ_B
 
                     _ezb.Movement.SetSpeed(255);
 
+                    /*
+                     * Servo init code
+                     */
+                    await _ezb.Servo.ResetAllServoSpeeds();
+                    // shoulders
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D15, EZ_B.Servo.SERVO_MIN, 10);
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D19, EZ_B.Servo.SERVO_MAX, 10);
+                    // elbows
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D14, EZ_B.Servo.SERVO_MIN, 10);
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D18, EZ_B.Servo.SERVO_MAX, 10);
+                    // wrist
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D13, EZ_B.Servo.SERVO_MIN, 10);
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D17, EZ_B.Servo.SERVO_MAX, 10);
+                    // claw
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, 10);
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, 10);
+                    // neck, vertical
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, 10);
+                    // neck, horizontal
+                    _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, 10);
+
+
+
+
+
 
 
                 }
