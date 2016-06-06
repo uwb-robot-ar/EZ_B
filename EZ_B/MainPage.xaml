@@ -8,10 +8,11 @@
 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 
-    mc:Ignorable="d" Width="Auto" Height="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="800" MaxHeight="480"
+    mc:Ignorable="d" Width="Auto" Height="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" 
     >
 
-    <StackPanel Orientation="Horizontal" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="800" Height="477">
+    <StackPanel Orientation="Horizontal" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1200" Height="600">
+    
         <Image x:Name="videoFeed" Height="480" Width="640"/>
         <StackPanel Name="controlbar">
             <StackPanel Name="buttons">
@@ -24,6 +25,8 @@
                 <Button x:Name="reverse_btn" Content="Reverse"  Height="40" HorizontalAlignment="Stretch" Click="Reverse_Btn_Click"/>
                 <Button x:Name="stop_btn" Content="Stop"  Height="40" HorizontalAlignment="Stretch" Click="Stop_Btn_Click"/>
             </StackPanel>
+        </StackPanel>
+        <StackPanel Name="logs" Width="396">
             <TextBlock x:Name="connectStatus" Text="Connection Status"/>
 
             <TextBlock x:Name="cameraStatus" Text="Camera Status"/>
@@ -31,7 +34,6 @@
             <TextBlock x:Name="errorStatus" Text="Error Status"/>
 
             <TextBlock x:Name="tappedStatus" Text="Tapped Status"/>
-
         </StackPanel>
     </StackPanel>
 
