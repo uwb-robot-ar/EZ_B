@@ -59,6 +59,8 @@ namespace EZ_B
             Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
             ApplicationView.GetForCurrentView().TryResizeView(new Size { Width = 1200, Height = 600 });
 
+            neck_slider.Value = 90;
+            neck_nod.Value = 45;
         }
 
 
@@ -88,26 +90,22 @@ namespace EZ_B
                    
                     _video.OnImageDataReady += Video_OnImageDataReady;
 
-                    // _video.OnStart += Video_OnStart;
                     errorStatus.Text = _ezb.GetLastErrorMsg;
-
-                    isEscape();
 
                     await _video.Start(_ezb, _ezb.ConnectedEndPointAddress, 24);
 
-
-                    _video.CameraSetting(EZBv4Video.CameraSettingsEnum.Res640x480);
-                //    _video.CameraSetting(EZBv4Video.CameraSettingsEnum.START);
+                    _video.CameraSetting(EZBv4Video.CameraSettingsEnum.Res160x120); // 640X480
+                    _video.CameraSetting(EZBv4Video.CameraSettingsEnum.MirrorDisable);
 
                     if (_video.IsRunning)
                     {
                         cameraStatus.Text = "CAMERA STREAMING!";
-
                     }
                     else
                     {
                         cameraStatus.Text = "CAMERA NOT STREAMING!";
                     }
+
                     /*
                      * Movement code init
                      */
@@ -124,43 +122,38 @@ namespace EZ_B
                     /*
                      * Servo init code
                      */
-                    await _ezb.Servo.ResetAllServoSpeeds();
-                    // shoulders
-                    //left
-                   await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D15, EZ_B.Servo.SERVO_CENTER, 10);
-                    //right
-                   await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D19, EZ_B.Servo.SERVO_CENTER, 10);
+                    await _ezb.Servo.ResetAllServoSpeeds(); // must reset speed to initialize
 
+                    int servo_speed = 128; 
+                    
+                    //left shoulder
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D15, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                    //right shoulder
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D19, EZ_B.Servo.SERVO_CENTER, servo_speed);
 
-                    // elbows
-                    //left
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D14, EZ_B.Servo.SERVO_CENTER, 10);
-                    //right
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D18, EZ_B.Servo.SERVO_CENTER, 10);
+                    //left elbow
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D14, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                    //right elbow
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D18, EZ_B.Servo.SERVO_CENTER, servo_speed);
 
-                    // wrist
-                    //left
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D13, EZ_B.Servo.SERVO_CENTER, 10);
-                    //right
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D17, EZ_B.Servo.SERVO_CENTER, 10);
+                    //left wrist
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D13, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                    //right wrist
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D17, EZ_B.Servo.SERVO_CENTER, servo_speed);
 
-                    // claw
-                    //left
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, 10);
-                    //right
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, 10);
+                    //left claw
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                    //right claw
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, servo_speed);
 
 
                     // neck, vertical
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, 10);
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, servo_speed);
                     // neck, horizontal
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, 10);
-
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, servo_speed);
 
                 }
             }
-
-        
             return;
         }
         //end of Button_Click
@@ -225,11 +218,6 @@ namespace EZ_B
         private async void Video_OnImageDataReady(byte[] imageData)
         {
             
-            //tappedStatus.Text = "OnIMAGE!";
-            //MusicSynth m = new MusicSynth(_ezb);
-            //m.PlayNote(MusicSynth.NotesEnum.C1, 1000);
-
-
             await Dispatcher.RunAsync(
             Windows.UI.Core.CoreDispatcherPriority.Normal,
             async () =>
@@ -261,7 +249,7 @@ namespace EZ_B
 
         private void isEscape()
         {
-            //tappedStatus.Text = "hello";
+           
             MusicSynth m = new MusicSynth(_ezb);
             m.PlayNote(MusicSynth.NotesEnum.C1, 1000);
         }
@@ -270,21 +258,130 @@ namespace EZ_B
         {
            
             tappedStatus.Text = string.Format("ADC 0: {0}", await _ezb.ADC.GetADCValue12Bit(EZ_B.ADC.ADCPortEnum.ADC0));
-            //if(_video.IsRunning)
-            //{
-            //    tappedStatus.Text = string.Format("Camera is running");
-            //}
-            //else
-            //{
-            //    tappedStatus.Text = string.Format("Camera NOT running");
-            //}
+
         }
 
         private void connectStatus_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
 
         }
+
+        /*
+         * Handler for neck roll (side to side rotation)
+         */
+        private async void NeckSwivel(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            Slider slider = sender as Slider;
+            if ((slider != null) && (_ezb != null)) // must check if _ezb is null because value change event is raised when slider value set
+            {
+                System.Int32 neck_pos = (int)(slider.Value);
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, neck_pos, 60); //last value (60) is speed
+            }
+        }
+
+        /*
+         * Handler for neck pitch (up and down) 
+         */
+        private async void NeckNod(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            Slider slider = sender as Slider;
+            // test if _ezb is initialized, or else it shits itself
+            if ((slider != null) && (_ezb != null))
+            {
+                System.Int32 neck_pos = (int)(slider.Value + 45);
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, neck_pos, 60);
+            }
+        }
+
+        private async void Key_Down(object sender, KeyRoutedEventArgs e)
+        {
+            int servo_speed = 128;
+
+            if (_ezb != null)
+            {
+                if (e.Key.ToString() == "W")
+                {
+                    _ezb.Movement.GoForward();
+                }
+                else if (e.Key.ToString() == "S")
+                {
+                    _ezb.Movement.GoReverse();
+                }
+                else if (e.Key.ToString() == "A")
+                {
+                    _ezb.Movement.GoLeft();
+                }
+                else if (e.Key.ToString() == "D")
+                {
+                    _ezb.Movement.GoRight();
+                }
+                else if (e.Key.ToString() == "U") //open LEFT
+                {
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_MIN, servo_speed);
+                }
+                else if (e.Key.ToString() == "I")  //close LEFT
+                {
+                    //left claw
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                }
+                else if (e.Key.ToString() == "O") //close RIGHT
+                {
+                    //right claw
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                }
+                else if (e.Key.ToString() == "P")  //open RIGHT
+                {
+                    //grab using right hand
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_MIN, servo_speed);
+                }
+            }
+        }
+
+        private void Key_Up(object sender, KeyRoutedEventArgs e)
+        {
+            if (_ezb != null)
+            {
+
+                if (e.Key.ToString() == "W")
+                {
+                    _ezb.Movement.GoStop();
+                }
+                else if (e.Key.ToString() == "S")
+                {
+                    _ezb.Movement.GoStop();
+                }
+                else if (e.Key.ToString() == "A")
+                {
+                    _ezb.Movement.GoStop();
+                }
+                else if (e.Key.ToString() == "D")
+                {
+                    _ezb.Movement.GoStop();
+                }
+                else if (e.Key.ToString() == "U")
+                {
+                    
+                }
+                else if (e.Key.ToString() == "I")
+                {
+                    
+                }
+                else if (e.Key.ToString() == "O")
+                {
+                    
+                }
+                else if (e.Key.ToString() == "P")
+                {
+                    
+                }
+            }
+        }
+
+
+
     }
+
+
 }
 
 

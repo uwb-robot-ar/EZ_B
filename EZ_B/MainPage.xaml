@@ -11,22 +11,27 @@
     mc:Ignorable="d" Width="Auto" Height="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" 
     >
 
-    <StackPanel Orientation="Horizontal" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1200" Height="600">
+    <StackPanel Orientation="Horizontal" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1200" Height="600" KeyDown="Key_Down" KeyUp ="Key_Up">
     
         <Image x:Name="videoFeed" Height="480" Width="640"/>
-        <StackPanel Name="controlbar">
-            <StackPanel Name="buttons">
-                <Button x:Name="connectButton" Content="Connect"  Height="40" HorizontalAlignment="Stretch" Click="Connect_Button_Click"/>
+        
+        <StackPanel Name="controlbar" VerticalAlignment="Center">
+            <StackPanel x:Name="buttons" VerticalAlignment="Center" Height="511">
+                <Button x:Name="connectButton" Content="Connect"  Height="40"  HorizontalAlignment="Stretch" Click="Connect_Button_Click"/>
                 <Button x:Name="forward_btn" Content="Forward"  Height="40" HorizontalAlignment="Stretch" Click="Forward_Btn_Click"/>
-                <StackPanel Name="rightleft" Orientation="Horizontal">
+                <StackPanel x:Name="rightleft" Orientation="Horizontal">
                     <Button x:Name="left_btn" Content="Left" Height="60" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="80" Click="Left_Btn_Click"/>
                     <Button x:Name="right_btn" Content="Right"  Height="60" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="80" Click="Right_Btn_Click"/>
                 </StackPanel>
+                
                 <Button x:Name="reverse_btn" Content="Reverse"  Height="40" HorizontalAlignment="Stretch" Click="Reverse_Btn_Click"/>
                 <Button x:Name="stop_btn" Content="Stop"  Height="40" HorizontalAlignment="Stretch" Click="Stop_Btn_Click"/>
+                <Slider x:Name="neck_slider" Header="Neck" Width="100" ValueChanged="NeckSwivel" Minimum="0" Maximum="180" IsDirectionReversed="True"/>
+                <Slider x:Name="neck_nod" HorizontalAlignment="Center"  VerticalAlignment="Center" Height ="146" Width="100" Maximum="135" Minimum="0"  Orientation="Vertical" ValueChanged="NeckNod" />
+                
             </StackPanel>
         </StackPanel>
-        <StackPanel Name="logs" Width="396">
+        <StackPanel Name="logs" Width="396" VerticalAlignment="Center">
             <TextBlock x:Name="connectStatus" Text="Connection Status"/>
 
             <TextBlock x:Name="cameraStatus" Text="Camera Status"/>
@@ -37,25 +42,5 @@
         </StackPanel>
     </StackPanel>
 
-    <!--
-    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="0,20,0,0">
-
-        <Button x:Name="connectButton" Content="Connect" Click="Button_Click"/>
-
-        <TextBlock x:Name="connectStatus"/>
-
-        <TextBlock x:Name="cameraStatus"/>
-        
-        <TextBlock x:Name="errorStatus"/>
-        
-        <TextBlock x:Name="tappedStatus"/>
-        
-        <Image x:Name = "imageSource" Width ="200" Height="200" Visibility= "Visible" Stretch="Fill" />
-        <Button x:Name="forward_btn" Content="Forward" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Forward_Btn_Click"/>
-        <Button x:Name="stop_btn" Content="Stop" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="Stop_Btn_Click"/>
-
-
-    </StackPanel>
-    -->
 </Page>
 
