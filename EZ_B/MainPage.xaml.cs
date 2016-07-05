@@ -47,6 +47,14 @@ namespace EZ_B
         EZBv4Video _video;
         WriteableBitmap bm;
         DispatcherTimer _timer = new DispatcherTimer();
+        
+        /*
+         * hold the direction of movement info here
+         */
+        private static const int SURGE = 0;
+        private static const int YAW = 1;
+        private double[] move_vec = {0, 0};
+        
 
 
 
@@ -165,7 +173,8 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoForward();
+                BotMove.stop();
+                BotMove.forward();
             }
         }
 
@@ -176,7 +185,7 @@ namespace EZ_B
         {
             if(_ezb != null)
             {
-                _ezb.Movement.GoStop();
+                BotMove.stop();
             }
         }
 
@@ -187,7 +196,8 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoReverse();
+                BotMove.stop();
+                BotMove.reverse();
             }
         }
 
@@ -198,7 +208,7 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoRight();
+                BotMove.right();
             }
         }
 
@@ -209,7 +219,7 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoLeft();
+                BotMove.left();
             }
         }
 
@@ -301,19 +311,19 @@ namespace EZ_B
             {
                 if (e.Key.ToString() == "W")
                 {
-                    _ezb.Movement.GoForward();
+                    BotMove.forward();
                 }
                 else if (e.Key.ToString() == "S")
                 {
-                    _ezb.Movement.GoReverse();
+                    BotMove.reverse();
                 }
                 else if (e.Key.ToString() == "A")
                 {
-                    _ezb.Movement.GoLeft();
+                    BotMove.left();
                 }
                 else if (e.Key.ToString() == "D")
                 {
-                    _ezb.Movement.GoRight();
+                    BotMove.right();
                 }
                 else if (e.Key.ToString() == "U") //open LEFT
                 {
@@ -344,19 +354,19 @@ namespace EZ_B
 
                 if (e.Key.ToString() == "W")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.reverse();
                 }
                 else if (e.Key.ToString() == "S")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.forward();
                 }
                 else if (e.Key.ToString() == "A")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.right();
                 }
                 else if (e.Key.ToString() == "D")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.left();
                 }
                 else if (e.Key.ToString() == "U")
                 {
@@ -378,7 +388,122 @@ namespace EZ_B
         }
 
 
-
+        /*
+         * Helper class to simplify more complex bot movement functions
+         */
+        private class BotMove {
+            
+            /*
+             * Constants for convenience.
+             */
+            private static int PORT = -1;
+            private static int STARBOARD = 1;
+            //private static int FORWARD  = 1;
+            //private static int REVERSE = -1;
+            
+            /*
+             * Constant for the sharpness of the turn.
+             */
+            //private static int TURNNING_RADIUS = 4;
+            
+            public static void forward() {
+                move_vec[SURGE] += 1;
+                if(move_vec[SURGE] > 1) {
+                    move_vec[SURGE] = 1;
+                }
+                updateSpeed(move_vec[SURGE], move_vec[YAW]);
+            }
+            
+            public static void reverse() {
+                move_vec[SURGE] -= 1;
+                if(move_vec[SURGE] < -1) {
+                    move_vec[SURGE] = -1;
+                }
+                updateSpeed(move_vec[SURGE], move_vec[YAW]);
+            }
+            
+            public static void left() {
+                move_vec[YAW] -= 1;
+                if(move_vec[YAW] < -1) {
+                    move_vec[YAW] = -1;
+                }
+                updateSpeed(move_vec[SURGE], move_vec[YAW]);
+            }
+            
+            public static void right() {                
+                move_vec[YAW] += 1;
+                if(move_vec[YAW] > 1) {
+                    move_vec[YAW] = 1;
+                }
+                updateSpeed(move_vec[SURGE], move_vec[YAW]);
+            }
+            
+            public static void stop() {
+                move_vec[SURGE] = 0;
+                move_vec[YAW] = 0;
+                updateSpeed(0, 0);
+            }
+            
+            
+            private static void updateSpeed(double surge, double yaw) {
+                int port, starbrd;
+                byte port_speed, starbrd_speed;
+                
+                port = adjustSpeed(surge, yaw, PORT);
+                starbrd = adjustSpeed(surge, yaw, STARBOARD);
+                
+                if(port < 0) {
+                    _ezb.Digital.SetDigitalPort(HBridgeLeftWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(HBridgeLeftWheelTriggerB, true);
+                    port_speed = (byte)(-1 * port);
+                } else if(port > 0) {
+                    _ezb.Digital.SetDigitalPort(HBridgeLeftWheelTriggerA, true);
+                    _ezb.Digital.SetDigitalPort(HBridgeLeftWheelTriggerB, false);
+                    port_speed = (byte)(port);
+                } else {
+                    _ezb.Digital.SetDigitalPort(HBridgeLeftWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(HBridgeLeftWheelTriggerB, false);
+                    port_speed = 0;
+                }
+                
+                if(starbrd < 0) {
+                    _ezb.Digital.SetDigitalPort(HBridgeRightWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(HBridgeRightWheelTriggerB, true);
+                    starbrd_speed = (byte)(-1 * starbrd);
+                } else if(starbrd > 0) {
+                    _ezb.Digital.SetDigitalPort(HBridgeRightWheelTriggerA, true);
+                    _ezb.Digital.SetDigitalPort(HBridgeRightWheelTriggerB, false);
+                    starbrd_speed = (byte)(starbrd);
+                } else {
+                    _ezb.Digital.SetDigitalPort(HBridgeRightWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(HBridgeRightWheelTriggerB, false);
+                    starbrd_speed = 0;
+                }
+                    
+                _ezb.Movement.SetSpeed(port_speed, starbrd_speed);
+            }
+            
+            //update docstring
+            /*
+             * Helper function to calculate speed of a given tread.
+             * @param d_tran Direction of translational veloicity i.e. FORWARD/REVERSE
+             * @param d_rot Direction of rotational velocity i.e. PORT/STARBOARD
+             * @param curr_speed Current speed of travel
+             * @return Adjusted speed of specified tread
+             */
+            private static byte adjustSpeed(double surge, double yaw, int side) {
+                double adj_vec = surge - (side * yaw / 2);
+                
+                int speed = (int)(adj_vec * 127);
+                // clamp speed to range of byte values, i.e. 0 \leq speed \leq 255
+                if(speed > 255) {
+                    speed = 255;
+                } else if (speed < -255) {
+                    speed = -255;
+                }
+                return (int)(speed);
+            }
+        }
     }
 
 
