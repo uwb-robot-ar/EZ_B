@@ -47,6 +47,24 @@ namespace EZ_B
         EZBv4Video _video;
         WriteableBitmap bm;
         DispatcherTimer _timer = new DispatcherTimer();
+        
+        /*
+         * These constants and variables are necessary for the revised movement functions 
+         * in BotMove.  move_vec holds the direction of movement as a vector of elements 
+         * in the interval [-1, 1].  
+         * The first element, SURGE, represents the forward/reverse translation axis with 
+         * forward being positive and reverse negative.  
+         * The second element, YAW, represents the rotation about the yaw (up/down) axis -- 
+         * basically, the direction its turning towards, with right being positive and left 
+         * negative.
+         * Calling BotMove functions will add vectors to the move_vec vector variable, so you 
+         * shouldn't need to mess with this directly, but pass the move_vec variable (by 
+         * reference) to the BotMove static function.
+         */
+        private const int SURGE = 0;
+        private const int YAW = 1;
+        private double[] move_vec = {0, 0};
+        
 
 
 
@@ -165,7 +183,8 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoForward();
+                BotMove.stop(move_vec, _ezb);
+                BotMove.forward(move_vec, _ezb);
             }
         }
 
@@ -176,7 +195,7 @@ namespace EZ_B
         {
             if(_ezb != null)
             {
-                _ezb.Movement.GoStop();
+                BotMove.stop(move_vec, _ezb);
             }
         }
 
@@ -187,7 +206,8 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoReverse();
+                BotMove.stop(move_vec, _ezb);
+                BotMove.reverse(move_vec, _ezb);
             }
         }
 
@@ -198,7 +218,7 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoRight();
+                BotMove.right(move_vec, _ezb);
             }
         }
 
@@ -209,7 +229,7 @@ namespace EZ_B
         {
             if (_ezb != null)
             {
-                _ezb.Movement.GoLeft();
+                BotMove.left(move_vec, _ezb);
             }
         }
 
@@ -301,19 +321,19 @@ namespace EZ_B
             {
                 if (e.Key.ToString() == "W")
                 {
-                    _ezb.Movement.GoForward();
+                    BotMove.forward(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "S")
                 {
-                    _ezb.Movement.GoReverse();
+                    BotMove.reverse(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "A")
                 {
-                    _ezb.Movement.GoLeft();
+                    BotMove.left(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "D")
                 {
-                    _ezb.Movement.GoRight();
+                    BotMove.right(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "U") //open LEFT
                 {
@@ -344,19 +364,19 @@ namespace EZ_B
 
                 if (e.Key.ToString() == "W")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.reverse(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "S")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.forward(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "A")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.right(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "D")
                 {
-                    _ezb.Movement.GoStop();
+                    BotMove.left(move_vec, _ezb);
                 }
                 else if (e.Key.ToString() == "U")
                 {
@@ -378,7 +398,191 @@ namespace EZ_B
         }
 
 
-
+        /*
+         * Helper class to simplify more complex bot movement functions. All 
+         * movement by tread can (should?) be handled by calling static 
+         * functions of this class.  These movement functions all require 
+         * as arguements references to move_vec (which holds direction data) 
+         * and the EZ_B object that is being moved.
+         * These functions will update move_vec to the new direction -- don't 
+         * change move_vec directly, outside of this class, please.
+         * The nautical terminology makes the frame of reference clear.
+         * To specify, the translation axes are: 
+         * - heave: up/down
+         * - sway: sideways
+         * - surge: forward/back 
+         * The rotation axes are: 
+         * - pitch: up/down over lateral axis e.g. nodding your head
+         * - roll: up/down over longitudinal axis e.g. tilting your head
+         * - yaw: rotate about vertical axis e.g. shaking your head
+         * We only have direct control over the surge and yaw axes: to be 
+         * precise, we have direct control over the surge of each tread.
+         * Currently implemented functions are:
+         * - forward
+         * - reverse
+         * - right
+         * - left
+         * - stop
+         */
+        private class BotMove {
+            
+            /*
+             * Constants for convenience.
+             */
+            private static int PORT = -1;
+            private static int STARBOARD = 1;
+            
+            /*
+             * Move the bot forward.
+             * @param move_vec Reference to array holding movmement vector data
+             * @param bot Reference to the EZB object to send movement commands to
+             */
+            public static void forward(double[] move_vec, EZB bot) {
+                // update vector, clamp it to range 
+                move_vec[SURGE] += 1;
+                if(move_vec[SURGE] > 1) {
+                    move_vec[SURGE] = 1;
+                }
+                // pass commands to bot
+                updateSpeed(move_vec[SURGE], move_vec[YAW], bot);
+            }
+            
+            /*
+             * Move the bot backwards.
+             * @param move_vec Reference to array holding movmement vector data
+             * @param bot Reference to the EZB object to send movement commands to
+             */
+            public static void reverse(double[] move_vec, EZB bot) {
+                // update vector, clamp it to range 
+                move_vec[SURGE] -= 1;
+                if(move_vec[SURGE] < -1) {
+                    move_vec[SURGE] = -1;
+                }
+                // pass commands to bot
+                updateSpeed(move_vec[SURGE], move_vec[YAW], bot);
+            }
+            
+            /*
+             * Rotate the bot to the left.
+             * @param move_vec Reference to array holding movmement vector data
+             * @param bot Reference to the EZB object to send movement commands to
+             */
+            public static void left(double[] move_vec, EZB bot) {
+                // update vector, clamp it to range 
+                move_vec[YAW] -= 1;
+                if(move_vec[YAW] < -1) {
+                    move_vec[YAW] = -1;
+                }
+                // pass commands to bot
+                updateSpeed(move_vec[SURGE], move_vec[YAW], bot);
+            }
+            
+            /*
+             * Rotate the bot right.
+             * @param move_vec Reference to array holding movmement vector data
+             * @param bot Reference to the EZB object to send movement commands to
+             */
+            public static void right(double[] move_vec, EZB bot) {                
+                // update vector, clamp it to range 
+                move_vec[YAW] += 1;
+                if(move_vec[YAW] > 1) {
+                    move_vec[YAW] = 1;
+                }
+                // pass commands to bot
+                updateSpeed(move_vec[SURGE], move_vec[YAW], bot);
+            }
+            
+            /*
+             * Stop the bot.
+             * @param move_vec Reference to array holding movmement vector data
+             * @param bot Reference to the EZB object to send movement commands to
+             */
+            public static void stop(double[] move_vec, EZB bot) {
+                // update vector to zero
+                move_vec[SURGE] = 0;
+                move_vec[YAW] = 0;
+                // pass commands to bot
+                updateSpeed(0, 0, bot);
+            }
+            
+            
+            /*
+             * Helper function. Calling this function will send the commands 
+             * to move the bot.  To be precise, it sends commands to update 
+             * the state of the signals being passed to the tread servos.
+             * Values of the surge and yaw axes are passed as floating point 
+             * numbers in the interval [-1, 1].
+             * @param surge Speed on the surge axis (forward/reverse translation)
+             * @param yaw Speed on the yaw axis (right/left rotation)
+             * @param _ezb Reference to EZB object accepting move commands
+             */
+            private static void updateSpeed(double surge, double yaw, EZB _ezb) {
+                // surge of treads as integers in interval [-255, 255]
+                int port, starbrd;
+                // byte value of speed of tread to pass to EZ_B.Movement functions
+                byte port_speed, starbrd_speed;
+                
+                port = adjustSpeed(surge, yaw, PORT);
+                starbrd = adjustSpeed(surge, yaw, STARBOARD);
+                
+                // configure HBridge of tread for the desired direction 
+                if(port < 0) {
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeLeftWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeLeftWheelTriggerB, true);
+                    port_speed = (byte)(-1 * port);
+                } else if(port > 0) {
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeLeftWheelTriggerA, true);
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeLeftWheelTriggerB, false);
+                    port_speed = (byte)(port);
+                } else {
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeLeftWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeLeftWheelTriggerB, false);
+                    port_speed = 0;
+                }
+                
+                if(starbrd < 0) {
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeRightWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeRightWheelTriggerB, true);
+                    starbrd_speed = (byte)(-1 * starbrd);
+                } else if(starbrd > 0) {
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeRightWheelTriggerA, true);
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeRightWheelTriggerB, false);
+                    starbrd_speed = (byte)(starbrd);
+                } else {
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeRightWheelTriggerA, false);
+                    _ezb.Digital.SetDigitalPort(_ezb.Movement.HBridgeRightWheelTriggerB, false);
+                    starbrd_speed = 0;
+                }
+                    
+                // move the damn thing
+                _ezb.Movement.SetSpeed(port_speed, starbrd_speed);
+            }
+            
+            /*
+             * Helper function to calculate speed of a given tread.  Chiefly, 
+             * it converts the floating point numbers representing speed on 
+             * the two axes we control (surge and yaw), which is in the 
+             * interval [-1, 1], to the integer representing speed and 
+             * direction of the given tread.
+             * @param surge Surge element of direction vector
+             * @param yaw Yaw element of direction vector
+             * @param side Which tread to calculate for
+             * @return Adjusted speed of specified tread
+             */
+            private static int adjustSpeed(double surge, double yaw, int side) {
+                // calculate surge of the specific tread
+                double adj_vec = surge - (side * yaw);
+                // convert surge of tread to speed 
+                int speed = (int)(adj_vec * 127);
+                // clamp speed to range of byte values, i.e. 0 \leq ||speed|| \leq 255
+                if(speed > 255) {
+                    speed = 255;
+                } else if (speed < -255) {
+                    speed = -255;
+                }
+                return (int)(speed);
+            }
+        }
     }
 
 
