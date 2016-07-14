@@ -29,6 +29,9 @@ using System.Diagnostics;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.ViewManagement;
 
+using Intel.RealSense;
+
+
 
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -67,6 +70,11 @@ namespace EZ_B
         
 
 
+        /*
+         * Some depth camera shit 
+         */
+        SenseManager cam;
+        SampleReader cam_read;
 
         public MainPage()
         {
@@ -106,7 +114,7 @@ namespace EZ_B
 
                     _video = new EZBv4Video();
                    
-                    _video.OnImageDataReady += Video_OnImageDataReady;
+                    //_video.OnImageDataReady += Video_OnImageDataReady;
 
                     errorStatus.Text = _ezb.GetLastErrorMsg;
 
@@ -169,6 +177,16 @@ namespace EZ_B
                     await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, servo_speed);
                     // neck, horizontal
                     await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, servo_speed);
+
+                    /*
+                     * init realsense
+                     */
+                    cam = SenseManager.CreateInstance();
+                    cam_read = SampleReader.Activate(cam, StreamType.STREAM_TYPE_DEPTH, 640, 480, 30);
+                    cam_read.SampleArrived += OnSample;
+                    await cam.InitAsync();
+                    cam.StreamFrames();
+
 
                 }
             }
@@ -395,6 +413,11 @@ namespace EZ_B
                     
                 }
             }
+        }
+
+        void OnSample(Object o, SampleArrivedEventArgs args) {
+            VideoFrame depth_img = args.Sample.DEPTH;
+            videoFeed.Source = depth_img.Direct3DSurface;
         }
 
 
