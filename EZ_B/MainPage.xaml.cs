@@ -30,6 +30,7 @@ using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.ViewManagement;
 
 using Intel.RealSense;
+using Windows.ApplicationModel.Core;
 
 
 
@@ -73,8 +74,8 @@ namespace EZ_B
         /*
          * Some depth camera shit 
          */
-        SenseManager cam;
-        SampleReader cam_read;
+        SenseManager cam = null;
+        SampleReader cam_read = null;
 
         public MainPage()
         {
@@ -87,6 +88,20 @@ namespace EZ_B
 
             neck_slider.Value = 90;
             neck_nod.Value = 45;
+
+            Debug.WriteLine("okay here");
+            SenseManager new_cam = SenseManager.CreateInstance();
+            cam = new_cam;
+            cam_read = SampleReader.Activate(cam, StreamType.STREAM_TYPE_DEPTH, 640, 480, 30);
+            cam_read.SampleArrived += OnSample;
+            cam.InitAsync();
+            cam.StreamFrames();
+           if (new_cam == null)
+            {
+                Debug.WriteLine("cam fail");
+            }
+
+
         }
 
 
@@ -181,11 +196,7 @@ namespace EZ_B
                     /*
                      * init realsense
                      */
-                    cam = SenseManager.CreateInstance();
-                    cam_read = SampleReader.Activate(cam, StreamType.STREAM_TYPE_DEPTH, 640, 480, 30);
-                    cam_read.SampleArrived += OnSample;
-                    await cam.InitAsync();
-                    cam.StreamFrames();
+
 
 
                 }
@@ -416,8 +427,13 @@ namespace EZ_B
         }
 
         void OnSample(Object o, SampleArrivedEventArgs args) {
-            VideoFrame depth_img = args.Sample.DEPTH;
-            videoFeed.Source = depth_img.Direct3DSurface;
+
+                VideoFrame depth_img = args.Sample.Depth;
+                var sbit = depth_img.SoftwareBitmap;
+                var foo = new WriteableBitmap(640, 480);
+
+                sbit.CopyToBuffer(foo.PixelBuffer);
+                videoFeed.Source = foo;
         }
 
 
