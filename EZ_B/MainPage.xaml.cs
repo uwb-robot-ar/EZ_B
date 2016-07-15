@@ -68,14 +68,14 @@ namespace EZ_B
         private const int SURGE = 0;
         private const int YAW = 1;
         private double[] move_vec = {0, 0};
-        
+
 
 
         /*
          * Some depth camera shit 
          */
-        SenseManager cam = null;
-        SampleReader cam_read = null;
+        SenseManager _cam = null;
+        SampleReader _cam_read = null;
 
         public MainPage()
         {
@@ -89,17 +89,22 @@ namespace EZ_B
             neck_slider.Value = 90;
             neck_nod.Value = 45;
 
-            Debug.WriteLine("okay here");
-            SenseManager new_cam = SenseManager.CreateInstance();
-            cam = new_cam;
-            cam_read = SampleReader.Activate(cam, StreamType.STREAM_TYPE_DEPTH, 640, 480, 30);
-            cam_read.SampleArrived += OnSample;
-            cam.InitAsync();
-            cam.StreamFrames();
-           if (new_cam == null)
+           if (_cam == null)
             {
                 Debug.WriteLine("cam fail");
             }
+
+            Debug.WriteLine("okay here");
+
+            _cam = SenseManager.CreateInstance();
+            SenseManager cam2 = SenseManager.CreateInstance();
+            if (_cam == null) Debug.WriteLine("omg it's still nullllll"); // why is this null??
+            _cam_read = SampleReader.Activate(_cam); // breaks here , StreamType.STREAM_TYPE_DEPTH, 640, 480, 15
+            Debug.WriteLine("are we there yet");
+            _cam_read.SampleArrived += OnSample;
+            _cam.InitAsync();
+            _cam.StreamFrames();
+
 
 
         }
@@ -196,8 +201,7 @@ namespace EZ_B
                     /*
                      * init realsense
                      */
-
-
+                   
 
                 }
             }
