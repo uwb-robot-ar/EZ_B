@@ -74,8 +74,8 @@ namespace EZ_B
         /*
          * Some depth camera shit 
          */
-        SenseManager _cam = null;
-        SampleReader _cam_read = null;
+        PXCMSenseManager _cam = null;
+        //SampleReader _cam_read = null;
 
         public MainPage()
         {
@@ -96,14 +96,15 @@ namespace EZ_B
 
             Debug.WriteLine("okay here");
 
-            _cam = SenseManager.CreateInstance();
-            SenseManager cam2 = SenseManager.CreateInstance();
+            _cam = PXCMSenseManager.CreateInstance();
+            
             if (_cam == null) Debug.WriteLine("omg it's still nullllll"); // why is this null??
-            _cam_read = SampleReader.Activate(_cam); // breaks here , StreamType.STREAM_TYPE_DEPTH, 640, 480, 15
+            _cam.EnableStream(PXCMCapture.StreamType.STREAM_TYPE_DEPTH, 640, 480);
+            PXCMSenseManager::Handler handler = new PXCMSenseManager.Handler();
+            handler.onNewSample = OnSample;
             Debug.WriteLine("are we there yet");
-            _cam_read.SampleArrived += OnSample;
-            _cam.InitAsync();
-            _cam.StreamFrames();
+            _cam.Init(handler);
+            _cam.StreamFrames(true);
 
 
 
@@ -430,14 +431,16 @@ namespace EZ_B
             }
         }
 
-        void OnSample(Object o, SampleArrivedEventArgs args) {
+        pxcmStatus OnSample(int mid, PXCMCapture.Sample sample) {
 
-                VideoFrame depth_img = args.Sample.Depth;
+                VideoFrame depth_img = sample.depth;
                 var sbit = depth_img.SoftwareBitmap;
                 var foo = new WriteableBitmap(640, 480);
 
                 sbit.CopyToBuffer(foo.PixelBuffer);
                 videoFeed.Source = foo;
+                return pxcmStatus.PXCM_STATUS_NO_ERROR;
+
         }
 
 
