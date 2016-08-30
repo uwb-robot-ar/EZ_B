@@ -8,39 +8,37 @@
 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 
-    mc:Ignorable="d" Width="Auto" Height="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" 
+    mc:Ignorable="d" Width="Auto" Height="Auto" HorizontalAlignment="Center" VerticalAlignment="Center" d:DesignWidth="852.402" d:DesignHeight="516.507" 
     >
 
-    <StackPanel Orientation="Horizontal" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1200" Height="600" KeyDown="Key_Down" KeyUp ="Key_Up">
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Width="1200" Height="600" KeyDown="Key_Down" KeyUp ="Key_Up">
     
-        <Image x:Name="videoFeed" Height="480" Width="640"/>
+        <Image x:Name="videoFeed" Height="480" Width="640" RelativePanel.AlignLeftWithPanel="true" RelativePanel.AlignVerticalCenterWithPanel="true"/>
         
-        <StackPanel Name="controlbar" VerticalAlignment="Center">
-            <StackPanel x:Name="buttons" VerticalAlignment="Center" Height="511">
-                <Button x:Name="connectButton" Content="Connect"  Height="40"  HorizontalAlignment="Stretch" Click="Connect_Button_Click"/>
-                <Button x:Name="forward_btn" Content="Forward"  Height="40" HorizontalAlignment="Stretch" Click="Forward_Btn_Click"/>
-                <StackPanel x:Name="rightleft" Orientation="Horizontal">
+        <RelativePanel x:Name="buttons" RelativePanel.RightOf="videoFeed" RelativePanel.AlignVerticalCenterWith="videoFeed">
+                <Button x:Name="connectButton" RelativePanel.AlignTopWithPanel="true" Content="Connect"  Click="Connect_Button_Click" Height="40" Width="160"/>
+                <Button x:Name="forward_btn" RelativePanel.Below="connectButton" Width="160"  Content="Forward" Height="40" Click="Forward_Btn_Click"/>
+                <StackPanel x:Name="rightleft" Orientation="Horizontal" Height="60" RelativePanel.Below="forward_btn">
                     <Button x:Name="left_btn" Content="Left" Height="60" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="80" Click="Left_Btn_Click"/>
                     <Button x:Name="right_btn" Content="Right"  Height="60" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="80" Click="Right_Btn_Click"/>
                 </StackPanel>
+
+                <Button x:Name="reverse_btn" RelativePanel.Below="rightleft" Width="160" Content="Reverse"  Height="40" Click="Reverse_Btn_Click"/>
+                <Button x:Name="stop_btn" RelativePanel.Below="reverse_btn" Content="Stop"  Width="160" Height="40" HorizontalAlignment="Stretch" Click="Stop_Btn_Click"/>
+                <Slider x:Name="neck_slider" RelativePanel.Below="stop_btn" RelativePanel.AlignHorizontalCenterWithPanel="true" Header="Neck" Width="100" ValueChanged="NeckSwivel" Minimum="0" Maximum="180" IsDirectionReversed="True"/>
+                <Slider x:Name="neck_nod" RelativePanel.Below="neck_slider" RelativePanel.AlignRightWith="connectButton"  VerticalAlignment="Center" Height ="146" Width="100" Maximum="135" Minimum="0"  Orientation="Vertical" ValueChanged="NeckNod" />
                 
-                <Button x:Name="reverse_btn" Content="Reverse"  Height="40" HorizontalAlignment="Stretch" Click="Reverse_Btn_Click"/>
-                <Button x:Name="stop_btn" Content="Stop"  Height="40" HorizontalAlignment="Stretch" Click="Stop_Btn_Click"/>
-                <Slider x:Name="neck_slider" Header="Neck" Width="100" ValueChanged="NeckSwivel" Minimum="0" Maximum="180" IsDirectionReversed="True"/>
-                <Slider x:Name="neck_nod" HorizontalAlignment="Center"  VerticalAlignment="Center" Height ="146" Width="100" Maximum="135" Minimum="0"  Orientation="Vertical" ValueChanged="NeckNod" />
-                
-            </StackPanel>
-        </StackPanel>
-        <StackPanel Name="logs" Width="396" VerticalAlignment="Center">
-            <TextBlock x:Name="connectStatus" Text="Connection Status"/>
+            </RelativePanel>
+        <RelativePanel Name="logs" Width="396" RelativePanel.RightOf="buttons" RelativePanel.AlignTopWith="buttons">
+            <TextBlock x:Name="connectStatus" Text="Connection Status" RelativePanel.AlignTopWithPanel="true"/>
 
-            <TextBlock x:Name="cameraStatus" Text="Camera Status"/>
+            <TextBlock x:Name="cameraStatus" Text="Camera Status" RelativePanel.Below="connectStatus" RelativePanel.AlignLeftWithPanel="true"/>
 
-            <TextBlock x:Name="errorStatus" Text="Error Status"/>
+            <TextBlock x:Name="errorStatus" Text="Error Status" RelativePanel.Below="cameraStatus" RelativePanel.AlignLeftWithPanel="true"/>
 
-            <TextBlock x:Name="tappedStatus" Text="Tapped Status"/>
-        </StackPanel>
-    </StackPanel>
+            <TextBlock x:Name="tappedStatus" Text="Tapped Status" RelativePanel.Below="errorStatus" RelativePanel.AlignLeftWithPanel="true"/>
+        </RelativePanel>
+    </RelativePanel>
 
 </Page>
 
