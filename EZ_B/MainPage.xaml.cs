@@ -28,6 +28,7 @@ using Windows.UI.Core;                // Used for updating UI from within async 
 using System.Diagnostics;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.ViewManagement;
+using Windows.Media.SpeechRecognition;
 
 
 
@@ -47,6 +48,8 @@ namespace EZ_B
         EZBv4Video _video;
         WriteableBitmap bm;
         DispatcherTimer _timer = new DispatcherTimer();
+
+        SpeechRecognizer _recognizer = new SpeechRecognizer();
         
         /*
          * These constants and variables are necessary for the revised movement functions 
@@ -77,112 +80,130 @@ namespace EZ_B
             Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
             ApplicationView.GetForCurrentView().TryResizeView(new Size { Width = 1200, Height = 600 });
 
+            listen(); // listen for "connect" command
             neck_slider.Value = 90;
             neck_nod.Value = 45;
+
+    }
+
+
+        private async void listen()
+        {
+            string[] SpeechInput = { "Connect" };
+            var ListConstraint = new SpeechRecognitionListConstraint(SpeechInput, "connect");
+            _recognizer.Constraints.Add(ListConstraint);
+
+            // compile it
+            await _recognizer.CompileConstraintsAsync();
+
+            // start recognition 
+            await _recognizer.RecognizeAsync();
+
+            // do something 
+            if (!_ezb.IsConnected)
+                ConnectBot();
         }
 
-
-        private async void Connect_Button_Click(object sender, RoutedEventArgs e)
+        private async void ConnectBot()
         {
-            
+            _ezb = new EZB();
+            await _ezb.Connect("192.168.1.1");
+
+            if (!_ezb.IsConnected)
+            {
+                connectStatus.Text = "NOT CONNECTED!";
+                return;
+            }
+
+            if (_ezb.IsConnected)
+            {
+                _timer.Start();
+                connectStatus.Text = "CONNECTED!";
+
+                _video = new EZBv4Video();
+
+                _video.OnImageDataReady += Video_OnImageDataReady;
+
+                errorStatus.Text = _ezb.GetLastErrorMsg;
+
+                await _video.Start(_ezb, _ezb.ConnectedEndPointAddress, 24);
+
+                _video.CameraSetting(EZBv4Video.CameraSettingsEnum.Res160x120); // 640X480
+                _video.CameraSetting(EZBv4Video.CameraSettingsEnum.MirrorDisable);
+
+                if (_video.IsRunning)
+                {
+                    cameraStatus.Text = "CAMERA STREAMING!";
+                }
+                else
+                {
+                    cameraStatus.Text = "CAMERA NOT STREAMING!";
+                }
+
+                /* 
+                 * Update button availability 
+                 */
+                connectButton.IsEnabled = false;
+                forward_btn.IsEnabled = true;
+                right_btn.IsEnabled = true;
+                left_btn.IsEnabled = true;
+                reverse_btn.IsEnabled = true;
+                stop_btn.IsEnabled = true;
+                neck_slider.IsEnabled = true;
+                neck_nod.IsEnabled = true;
+
+                /*
+                 * Movement code init
+                 */
+                _ezb.Movement.MovementType = EZ_B.Movement.MovementTypeEnum.HBridgePWM;
+                _ezb.Movement.HBridgeLeftWheelTriggerA = EZ_B.Digital.DigitalPortEnum.D1;
+                _ezb.Movement.HBridgeLeftWheelTriggerB = EZ_B.Digital.DigitalPortEnum.D2;
+                _ezb.Movement.HBridgeRightWheelTriggerA = EZ_B.Digital.DigitalPortEnum.D3;
+                _ezb.Movement.HBridgeRightWheelTriggerB = EZ_B.Digital.DigitalPortEnum.D4;
+                _ezb.Movement.HBridgeLeftWheelPWM = EZ_B.Digital.DigitalPortEnum.D0;
+                _ezb.Movement.HBridgeRightWheelPWM = EZ_B.Digital.DigitalPortEnum.D5;
+
+                _ezb.Movement.SetSpeed(255);
+
+                /*
+                 * Servo init code
+                 */
+                await _ezb.Servo.ResetAllServoSpeeds(); // must reset speed to initialize
+
+                int servo_speed = 128;
+
+                //left shoulder
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D15, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                //right shoulder
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D19, EZ_B.Servo.SERVO_CENTER, servo_speed);
+
+                //left elbow
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D14, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                //right elbow
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D18, EZ_B.Servo.SERVO_CENTER, servo_speed);
+
+                //left wrist
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D13, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                //right wrist
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D17, EZ_B.Servo.SERVO_CENTER, servo_speed);
+
+                //left claw
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                //right claw
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, servo_speed);
+
+                // neck, vertical
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                // neck, horizontal
+                await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, servo_speed);
+            }
+        }
+
+        private void Connect_Button_Click(object sender, RoutedEventArgs e)
+        {
             if ((Button)sender == connectButton)
             {
-                _ezb = new EZB();
-                await _ezb.Connect("192.168.1.1");
-
-                if (!_ezb.IsConnected)
-                {
-    
-                    connectStatus.Text = "NOT CONNECTED!";
-
-                    return;
-                }
-
-                if (_ezb.IsConnected)
-                {
-                    _timer.Start();
-                    connectStatus.Text = "CONNECTED!";
-
-
-                    _video = new EZBv4Video();
-                   
-                    _video.OnImageDataReady += Video_OnImageDataReady;
-
-                    errorStatus.Text = _ezb.GetLastErrorMsg;
-
-                    await _video.Start(_ezb, _ezb.ConnectedEndPointAddress, 24);
-
-                    _video.CameraSetting(EZBv4Video.CameraSettingsEnum.Res160x120); // 640X480
-                    _video.CameraSetting(EZBv4Video.CameraSettingsEnum.MirrorDisable);
-
-                    if (_video.IsRunning)
-                    {
-                        cameraStatus.Text = "CAMERA STREAMING!";
-                    }
-                    else
-                    {
-                        cameraStatus.Text = "CAMERA NOT STREAMING!";
-                    }
-
-                    /* 
-                     * Update button availability 
-                     */
-                    connectButton.IsEnabled = false;
-                    forward_btn.IsEnabled = true;
-                    right_btn.IsEnabled = true;
-                    left_btn.IsEnabled = true;
-                    reverse_btn.IsEnabled = true;
-                    stop_btn.IsEnabled = true;
-                    neck_slider.IsEnabled = true;
-                    neck_nod.IsEnabled = true;
-
-                    /*
-                     * Movement code init
-                     */
-                    _ezb.Movement.MovementType = EZ_B.Movement.MovementTypeEnum.HBridgePWM;
-                    _ezb.Movement.HBridgeLeftWheelTriggerA = EZ_B.Digital.DigitalPortEnum.D1;
-                    _ezb.Movement.HBridgeLeftWheelTriggerB = EZ_B.Digital.DigitalPortEnum.D2;
-                    _ezb.Movement.HBridgeRightWheelTriggerA = EZ_B.Digital.DigitalPortEnum.D3;
-                    _ezb.Movement.HBridgeRightWheelTriggerB = EZ_B.Digital.DigitalPortEnum.D4;
-                    _ezb.Movement.HBridgeLeftWheelPWM = EZ_B.Digital.DigitalPortEnum.D0;
-                    _ezb.Movement.HBridgeRightWheelPWM = EZ_B.Digital.DigitalPortEnum.D5;
-
-                    _ezb.Movement.SetSpeed(255);
-
-                    /*
-                     * Servo init code
-                     */
-                    await _ezb.Servo.ResetAllServoSpeeds(); // must reset speed to initialize
-
-                    int servo_speed = 128; 
-                    
-                    //left shoulder
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D15, EZ_B.Servo.SERVO_CENTER, servo_speed);
-                    //right shoulder
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D19, EZ_B.Servo.SERVO_CENTER, servo_speed);
-
-                    //left elbow
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D14, EZ_B.Servo.SERVO_CENTER, servo_speed);
-                    //right elbow
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D18, EZ_B.Servo.SERVO_CENTER, servo_speed);
-
-                    //left wrist
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D13, EZ_B.Servo.SERVO_CENTER, servo_speed);
-                    //right wrist
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D17, EZ_B.Servo.SERVO_CENTER, servo_speed);
-
-                    //left claw
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, servo_speed);
-                    //right claw
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, servo_speed);
-
-
-                    // neck, vertical
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, servo_speed);
-                    // neck, horizontal
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, servo_speed);
-
-                }
+                ConnectBot();   
             }
             return;
         }
