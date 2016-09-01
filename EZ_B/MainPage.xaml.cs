@@ -124,6 +124,18 @@ namespace EZ_B
                         cameraStatus.Text = "CAMERA NOT STREAMING!";
                     }
 
+                    /* 
+                     * Update button availability 
+                     */
+                    connectButton.IsEnabled = false;
+                    forward_btn.IsEnabled = true;
+                    right_btn.IsEnabled = true;
+                    left_btn.IsEnabled = true;
+                    reverse_btn.IsEnabled = true;
+                    stop_btn.IsEnabled = true;
+                    neck_slider.IsEnabled = true;
+                    neck_nod.IsEnabled = true;
+
                     /*
                      * Movement code init
                      */
