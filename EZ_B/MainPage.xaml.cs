@@ -102,7 +102,7 @@ namespace EZ_B
             // do something 
             Debug.WriteLine(result.Text);
             Debug.WriteLine("Listen do something done");
-            ConnectBot();
+            //ConnectBot();
 
             ///* 
             _recognizer.ContinuousRecognitionSession.ResultGenerated += VoiceHandler;
