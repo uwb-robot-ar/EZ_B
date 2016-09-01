@@ -97,11 +97,17 @@ namespace EZ_B
             await _recognizer.CompileConstraintsAsync();
 
             // start recognition 
-            await _recognizer.RecognizeAsync();
+            SpeechRecognitionResult result = await _recognizer.RecognizeWithUIAsync();
 
             // do something 
-            if (!_ezb.IsConnected)
-                ConnectBot();
+            Debug.WriteLine(result.Text);
+            Debug.WriteLine("Listen do something done");
+            ConnectBot();
+
+            ///* 
+            _recognizer.ContinuousRecognitionSession.ResultGenerated += VoiceHandler;
+            // */
+            
         }
 
         private async void ConnectBot()
@@ -196,6 +202,18 @@ namespace EZ_B
                 await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, servo_speed);
                 // neck, horizontal
                 await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, servo_speed);
+            }
+        }
+
+        async private void VoiceHandler(SpeechContinuousRecognitionSession session, SpeechContinuousRecognitionResultGeneratedEventArgs e)
+        {
+            if(e.Result.Text == "Connect")
+            {
+                Debug.WriteLine("Voice Command: " + e.Result.Text);
+                if(_ezb == null)
+                {
+                    ConnectBot();
+                }
             }
         }
 
