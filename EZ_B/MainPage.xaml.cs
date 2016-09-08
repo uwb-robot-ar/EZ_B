@@ -80,7 +80,7 @@ namespace EZ_B
             Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
             ApplicationView.GetForCurrentView().TryResizeView(new Size { Width = 1200, Height = 600 });
 
-            //listen(); // listen for "connect" command
+            listen(); // listen for "connect" command
             neck_slider.Value = 90;
             neck_nod.Value = 45;
 
