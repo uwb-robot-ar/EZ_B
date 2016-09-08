@@ -80,7 +80,7 @@ namespace EZ_B
             Windows.UI.ViewManagement.ApplicationView.PreferredLaunchWindowingMode = Windows.UI.ViewManagement.ApplicationViewWindowingMode.PreferredLaunchViewSize;
             ApplicationView.GetForCurrentView().TryResizeView(new Size { Width = 1200, Height = 600 });
 
-            listen(); // listen for "connect" command
+            //listen(); // listen for "connect" command
             neck_slider.Value = 90;
             neck_nod.Value = 45;
 
@@ -325,9 +325,9 @@ namespace EZ_B
             tappedStatus.Text = "OnStart!";
         }
 
+        // vintage landmark 
         private void isEscape()
         {
-           
             MusicSynth m = new MusicSynth(_ezb);
             m.PlayNote(MusicSynth.NotesEnum.C1, 1000);
         }
@@ -373,7 +373,7 @@ namespace EZ_B
 
         private async void Key_Down(object sender, KeyRoutedEventArgs e)
         {
-            int servo_speed = 128;
+            int servo_speed = 5;
 
             if (_ezb != null)
             {
@@ -395,23 +395,54 @@ namespace EZ_B
                 }
                 else if (e.Key.ToString() == "U") //open LEFT
                 {
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_MIN, servo_speed);
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_MIN, 0);
                 }
                 else if (e.Key.ToString() == "I")  //close LEFT
                 {
                     //left claw
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D12, EZ_B.Servo.SERVO_CENTER, 0);
                 }
                 else if (e.Key.ToString() == "O") //close RIGHT
                 {
                     //right claw
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_CENTER, 0);
                 }
                 else if (e.Key.ToString() == "P")  //open RIGHT
                 {
                     //grab using right hand
-                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_MIN, servo_speed);
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D16, EZ_B.Servo.SERVO_MIN, 0);
                 }
+
+                // neck nod movement
+                else if (e.Key.ToString() == "J") //move neck to top pos
+                { 
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, 150, 3);
+                }
+
+                else if (e.Key.ToString() == "K") //move neck to center
+                {
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, EZ_B.Servo.SERVO_CENTER, 3);
+                }
+                else if (e.Key.ToString() == "L") //move neck to down pos
+                {
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D9, 30, 3);
+                }
+
+                //neck swivel movement
+                else if (e.Key.ToString() == "Z") // move neck swivel left
+                {
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, 150, servo_speed);
+                }
+                else if (e.Key.ToString() == "X") // move neck swivel center
+                {
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, EZ_B.Servo.SERVO_CENTER, servo_speed);
+                }
+                else if (e.Key.ToString() == "C") // move neck swivel right
+                {
+                    await _ezb.Servo.SetServoPosition(EZ_B.Servo.ServoPortEnum.D10, 30, servo_speed);
+                }
+
+
             }
         }
 
