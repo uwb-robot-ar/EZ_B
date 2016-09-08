@@ -105,6 +105,7 @@ namespace EZ_B
             Debug.WriteLine("Listen do something done");
             if (result.Text == "Connect")
             {
+                Debug.WriteLine("Trying to connect from voice commands.");
                 ConnectBot();
             }
             //
