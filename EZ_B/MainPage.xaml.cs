@@ -96,22 +96,29 @@ namespace EZ_B
             // compile it
             await _recognizer.CompileConstraintsAsync();
 
+            //*
             // start recognition 
             SpeechRecognitionResult result = await _recognizer.RecognizeWithUIAsync();
 
             // do something 
             Debug.WriteLine(result.Text);
             Debug.WriteLine("Listen do something done");
-            //ConnectBot();
+            if (result.Text == "Connect")
+            {
+                ConnectBot();
+            }
+            //
 
-            ///* 
+            /* 
             _recognizer.ContinuousRecognitionSession.ResultGenerated += VoiceHandler;
+            await _recognizer.ContinuousRecognitionSession.StartAsync();
             // */
             
         }
 
         private async void ConnectBot()
         {
+            //connectStatus.Text = "CONNECTING";
             _ezb = new EZB();
             await _ezb.Connect("192.168.1.1");
 
@@ -205,7 +212,7 @@ namespace EZ_B
             }
         }
 
-        async private void VoiceHandler(SpeechContinuousRecognitionSession session, SpeechContinuousRecognitionResultGeneratedEventArgs e)
+        private void VoiceHandler(SpeechContinuousRecognitionSession session, SpeechContinuousRecognitionResultGeneratedEventArgs e)
         {
             if(e.Result.Text == "Connect")
             {
